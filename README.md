@@ -95,3 +95,36 @@ docker compose up -d
 # 3. Start a plugin (in a separate terminal)
 cd plugins/warehouse && npm run dev
 ```
+
+For browser links, published ports, and the role of every Compose service, see
+the [Docker Compose guide (Polski)](./COMPOSE-GUIDE.md).
+
+### ClickHouse Startup Troubleshooting
+
+ClickHouse is pinned to version `26.8.37.168` to avoid unexpected changes from
+the `latest` tag. An image with an empty `/entrypoint.sh` can fail with
+`exec /entrypoint.sh: exec format error`.
+
+To pull the pinned image and recreate ClickHouse without deleting its data:
+
+```bash
+docker compose pull clickhouse
+docker compose up -d --wait clickhouse
+docker compose up -d
+```
+
+Do not use `docker compose down -v` for this error: it deletes database volumes.
+The `minio-setup` container exiting with code `0` is expected after bucket setup.
+
+### Presidio Startup Troubleshooting
+
+The anonymizer disables Gunicorn 25.1.0's control socket to avoid a startup
+deadlock that leaves the server listening without a working request handler.
+Its health probe has an explicit request timeout to prevent lingering checks.
+
+After updating Compose, recreate the anonymizer and start LiteLLM:
+
+```bash
+docker compose up -d --wait presidio-anonymizer
+docker compose up -d --wait litellm
+```

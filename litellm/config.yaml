@@ -1,6 +1,12 @@
 model_list:
   - model_name: gpt-4o-mini
     litellm_params:
+      model: openai/NAZWA_WDROZENIA_Z_AZURE
+      api_base: os.environ/AZURE_OPENAI_BASE_URL
+      api_key: os.environ/AZURE_OPENAI_API_KEY
+
+  - model_name: gpt-4o-mini
+    litellm_params:
       model: openai/gpt-4o-mini
       api_key: os.environ/OPENAI_API_KEY
 

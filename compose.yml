@@ -38,7 +38,7 @@ services:
   clickhouse:
     labels:
       org.springframework.boot.ignore: "true"
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:26.8.37.168
     ports:
       - '8123:8123'
       - '9000:9000'
@@ -185,8 +185,11 @@ services:
     image: mcr.microsoft.com/presidio-anonymizer:latest
     ports:
       - '5001:3000'
+    environment:
+      # Avoid the Gunicorn 25.1.0 control-socket startup deadlock.
+      GUNICORN_CMD_ARGS: "--no-control-socket"
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3000/health')\""]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3000/health', timeout=3)"]
       interval: 15s
       timeout: 5s
       retries: 10
