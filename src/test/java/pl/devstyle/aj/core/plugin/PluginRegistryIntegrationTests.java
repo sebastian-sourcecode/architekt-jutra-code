@@ -114,15 +114,16 @@ class PluginRegistryIntegrationTests {
     }
 
     @Test
-    void getPlugins_returnsOnlyEnabled() throws Exception {
+    void getPlugins_returnsEnabledAndDisabledPlugins() throws Exception {
         createAndSavePlugin("enabled-plugin", "Enabled Plugin", true);
         createAndSavePlugin("disabled-plugin", "Disabled Plugin", false);
 
         mockMvc.perform(get("/api/plugins"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value("enabled-plugin"));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[?(@.id == 'enabled-plugin')].enabled").value(true))
+                .andExpect(jsonPath("$[?(@.id == 'disabled-plugin')].enabled").value(false));
     }
 
     @Test
@@ -161,6 +162,8 @@ class PluginRegistryIntegrationTests {
         mockMvc.perform(get("/api/plugins"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value("toggle-plugin"))
+                .andExpect(jsonPath("$[0].enabled").value(false));
     }
 }

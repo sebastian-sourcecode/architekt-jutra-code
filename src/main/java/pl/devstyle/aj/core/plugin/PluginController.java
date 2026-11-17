@@ -34,7 +34,7 @@ public class PluginController {
 
     @GetMapping
     public List<PluginResponse> list() {
-        return pluginDescriptorService.findAllEnabled().stream()
+        return pluginDescriptorService.findAll().stream()
                 .map(PluginResponse::from)
                 .toList();
     }

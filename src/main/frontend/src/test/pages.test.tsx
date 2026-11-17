@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
@@ -7,7 +7,7 @@ import type { CategoryResponse } from "../api/categories";
 import type { ProductResponse } from "../api/products";
 import * as categoriesApi from "../api/categories";
 import * as productsApi from "../api/products";
-import { PluginProvider } from "../plugins/PluginContext";
+import { PluginProvider, usePluginContext } from "../plugins/PluginContext";
 import * as pluginsApi from "../api/plugins";
 
 vi.mock("../auth/AuthContext", async (importOriginal) => {
@@ -149,5 +149,58 @@ describe("ProductFormPage", () => {
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/photo url/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+  });
+});
+
+describe("PluginFormPage", () => {
+  it("refreshes the shared plugin list after saving a manifest", async () => {
+    const { PluginFormPage } = await import("../pages/PluginFormPage");
+    const savedPlugin: pluginsApi.PluginResponse = {
+      id: "AIDescription",
+      name: "AI Description",
+      version: "1.0.0",
+      url: "http://localhost:3003",
+      description: "Generate AI-powered product descriptions",
+      enabled: true,
+      extensionPoints: [],
+    };
+    vi.mocked(pluginsApi.getPlugins)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([savedPlugin]);
+    vi.mocked(pluginsApi.uploadManifest).mockResolvedValue(savedPlugin);
+
+    function PluginNames() {
+      const { plugins } = usePluginContext();
+      return <div>{plugins.map((plugin) => plugin.name).join(", ")}</div>;
+    }
+
+    renderWithProviders(
+      <>
+        <PluginFormPage />
+        <PluginNames />
+      </>,
+      "/plugins/new",
+    );
+
+    fireEvent.change(screen.getByLabelText(/plugin id/i), {
+      target: { value: savedPlugin.id },
+    });
+    fireEvent.change(screen.getByLabelText(/manifest \(json\)/i), {
+      target: {
+        value: JSON.stringify({
+          name: savedPlugin.name,
+          version: savedPlugin.version,
+          url: savedPlugin.url,
+          description: savedPlugin.description,
+          extensionPoints: [],
+        }),
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /save plugin/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(savedPlugin.name)).toBeInTheDocument();
+    });
+    expect(pluginsApi.getPlugins).toHaveBeenCalledTimes(2);
   });
 });

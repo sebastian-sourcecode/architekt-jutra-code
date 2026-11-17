@@ -54,8 +54,8 @@ public class PluginDescriptorService {
     }
 
     @Transactional(readOnly = true)
-    public List<PluginDescriptor> findAllEnabled() {
-        return pluginDescriptorRepository.findByEnabledTrue();
+    public List<PluginDescriptor> findAll() {
+        return pluginDescriptorRepository.findAll();
     }
 
     @Transactional(readOnly = true)

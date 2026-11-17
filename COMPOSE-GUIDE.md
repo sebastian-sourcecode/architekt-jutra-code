@@ -120,6 +120,11 @@ Następnie sprawdź jego stan w panelu pluginów.
 | [ClickHouse SQL Playground](http://localhost:8123/play) | **Tak — konsola SQL** | Prosty interfejs do wykonywania SQL w ClickHouse. | Po zalogowaniu wykonaj `SHOW DATABASES`. To bezpośredni dostęp do bazy, nie panel Langfuse. |
 
 ### Logowanie
+Do aplikacji zaloguj się na http://localhost:8080/login danymi:
+
+Login: admin
+Hasło: admin123
+
 
 W kolumnie „Hasło” podana jest **nazwa zmiennej, której wartość należy wpisać**,
 nie dosłowny tekst hasła. Dzięki temu dokument nie powiela sekretów.

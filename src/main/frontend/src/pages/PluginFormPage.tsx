@@ -12,6 +12,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { getPlugin, uploadManifest } from "../api/plugins";
 import type { ManifestPayload } from "../api/plugins";
 import { PrimaryButton } from "../components/shared/PrimaryButton";
+import { usePluginContext } from "../plugins/PluginContext";
 
 const labelStyle: React.CSSProperties = {
   fontSize: "14px",
@@ -32,6 +33,7 @@ const DEFAULT_MANIFEST: ManifestPayload = {
 export function PluginFormPage() {
   const { pluginId } = useParams<{ pluginId: string }>();
   const navigate = useNavigate();
+  const { refetch } = usePluginContext();
   const isEdit = Boolean(pluginId);
 
   const [id, setId] = useState(pluginId ?? "");
@@ -85,6 +87,7 @@ export function PluginFormPage() {
     setLoading(true);
     try {
       await uploadManifest(id.trim(), manifest);
+      await refetch();
       navigate(`/plugins/${id.trim()}/detail`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save plugin.");
